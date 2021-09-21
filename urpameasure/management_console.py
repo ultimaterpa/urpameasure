@@ -29,7 +29,7 @@ class Console(Urpameasure):
         self,
         id: str,
         default_status: str = NONE,
-        default_name: str = "0 Unnamed measurement", # TODO consider defaulting to 'id'
+        default_name: str = "0 Unnamed measurement",  # TODO consider defaulting to 'id'
         default_value: Optional[float] = None,
         default_unit: Optional[str] = None,
         default_tolerance: float = 0,
@@ -76,9 +76,9 @@ class Console(Urpameasure):
 
     def write(
         self,
-        id,
+        id: str,
         status: Optional[str] = None,
-        name: Optional[str] = None,
+        name: Optional[str] = None,  # TODO add strict mode
         value: Optional[float] = None,
         unit: Optional[str] = None,
         tolerance: Optional[float] = None,
@@ -88,7 +88,7 @@ class Console(Urpameasure):
         """Writes a measurement to Management Console
 
         Args:
-            id ([type]): Unique id of this measurement
+            id (str): Unique id of this measurement
             status (Optional[str], optional): status to be written to Console. self.measurements[id]["default_status"] is used if not provided. Defaults to None.
             name (Optional[str], optional): name to be written to Console. self.measurements[id]["default_name"] is used if not provided. Defaults to None.
             value (Optional[float], optional): value to be written to Console. self.measurements[id]["default_value"] is used if not provided. Defaults to None.
@@ -121,21 +121,6 @@ class Console(Urpameasure):
             id=id,
         )
 
-    def clear(self, id: str) -> None:
-        """Writes a measurement with all default values
-
-        Args:
-            id (str): unique id of this measurement
-        """
-        # supply no args so it takes all default values
-        self.write(id)
-
-    def clear_all(self) -> None:
-        """Iterates over all self.measurements and writes default values to them
-        """
-        for measurement_id in self.measurements:
-            self.clear(measurement_id)
-
     def _get_measured_time(self, time_unit: str) -> float:
         """Calls super's _get_measured_time method and converts its output based on 'unit'
 
@@ -149,17 +134,17 @@ class Console(Urpameasure):
             float: measured time in desired units
         """
         time_elapsed_seconds = super()._get_measured_time()
-        if time_unit == "s":
+        if time_unit == SECONDS:
             time_conversion_coeficient = 1
-        elif time_unit == "m":
+        elif time_unit == MINUTES:
             time_conversion_coeficient = 60
-        elif time_unit == "h":
+        elif time_unit == HOURS:
             time_conversion_coeficient = 60 * 60
         else:
             raise ValueError(f"Invalid time unit '{time_unit}'")
         return time_elapsed_seconds / time_conversion_coeficient
 
-    def _send_time_measure(self, id: str, value: float, status: str) -> None:
+    def _send_time_measure(self, id: str, value: float, status: str = INFO) -> None:
         """Method called by measure_time decorator
 
         Args:
@@ -170,7 +155,12 @@ class Console(Urpameasure):
         self.write(id=id, status=status, value=value)
 
     def _send_login_measure(
-        self, id: str, value: float, error_status: str = ERROR, success_status: str = SUCCESS, default_status: str = NONE
+        self,
+        id: str,
+        value: float,
+        error_status: str = ERROR,
+        success_status: str = SUCCESS,
+        default_status: str = NONE,
     ) -> None:
         """Method called by measure_login decorato
 
@@ -186,5 +176,4 @@ class Console(Urpameasure):
             status = error_status
         elif value == 100:
             status = success_status
-        print(f"login measure {value}")
         self.write(id=id, status=status, value=value)

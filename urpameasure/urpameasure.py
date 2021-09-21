@@ -1,3 +1,4 @@
+import logging
 import os
 
 import time
@@ -8,6 +9,9 @@ from typing import Optional, Union
 
 from .globals import *
 from .utils import check_valid_status
+
+logger = logging.getLogger(__name__)
+
 
 class Urpameasure(ABC):
     def __init__(self):
@@ -29,11 +33,12 @@ class Urpameasure(ABC):
         if not id in self.measurements:
             raise KeyError(f"Measurement with id '{id}' does not exist")
         if not value_key in self.measurements[id].keys():
-            raise KeyError(f"Invalid key '{value_key}'. Please use one of the following: '{self.measurements[id].keys()}'")
+            raise KeyError(
+                f"Invalid key '{value_key}'. Please use one of the following: '{self.measurements[id].keys()}'"
+            )
         if value_key == "default_status":
             check_valid_status(new_value)
         self.measurements[id][value_key] = new_value
-
 
     def _touch_time_measure_file(self) -> None:
         """[summary]"""
@@ -68,26 +73,50 @@ class Urpameasure(ABC):
         time_elapsed_seconds = time.time() - start_value
         return time_elapsed_seconds
 
+    @abstractmethod
+    def write(self, *args) -> None:
+        """[summary]"""
+
     def _remove_time_measure_file(self):
         """Removes file with time measure after it is no longer needed"""
         os.remove(MEASURE_TIME_FILE_NAME)
 
-    def measure_time(self, id, status: str = INFO, time_unit: str = "s"):
-        """decorator"""
-        if time_unit != "s":
-            # TODO dont call it unit... console already has arg unit
+    def clear(self, id: str) -> None:
+        """Writes a measurement with all default values
+
+        Args:
+            id (str): unique id of this measurement
+        """
+        # supply no args so it takes all default values
+        self.write(id)
+
+    def clear_all(self) -> None:
+        """Iterates over all self.measurements and writes default values to them"""
+        for measurement_id in self.measurements:
+            self.clear(measurement_id)
+
+    def measure_time(self, id, time_unit: str = SECONDS, **kwargs):
+        """decorator
+        kwargs for console: status
+        kwargs for sydesk: expiration, description
+        """
+        if time_unit != SECONDS:
             # used only for management console
-            # setting unit for sydesk has no effect
-            possible_units = ("h", "m", "s")
-            if time_unit not in possible_units:
-                raise ValueError(f"Invalid time unit '{time_unit}'. Please use one of the following: '{possible_units}'")
+            if self.__class__.__name__ != "Sydesk":
+                possible_units = (SECONDS, MINUTES, HOURS)
+                if time_unit not in possible_units:
+                    raise ValueError(
+                        f"Invalid time unit '{time_unit}'. Please use one of the following: '{possible_units}'"
+                    )
+            else:
+                logger.warning("Setting time_unit for Sydesk measurement has no effect. It accepts seconds only")
 
         def wrapper(func):
             @wraps(func)
             def inner():
                 self._start_time_measure()
                 func()
-                self._send_time_measure(id, self._get_measured_time(time_unit), status)
+                self._send_time_measure(id, self._get_measured_time(time_unit), **kwargs)
                 self._remove_time_measure_file()
 
             return inner
@@ -103,7 +132,7 @@ class Urpameasure(ABC):
         def wrapper(func):
             @wraps(func)
             def inner():
-                #self._send_login_measure(id, 50, error_status, success_status, default_status)  # reset value - can be anything besides 0 and 100
+                # self._send_login_measure(id, 50, error_status, success_status, default_status)  # reset value - can be anything besides 0 and 100
                 try:
                     func()
                 except Exception as error:
@@ -113,4 +142,5 @@ class Urpameasure(ABC):
                     self._send_login_measure(id, 100, **kwargs)
 
             return inner
+
         return wrapper

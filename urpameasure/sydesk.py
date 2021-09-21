@@ -1,5 +1,3 @@
-
-
 from __future__ import annotations
 
 import logging
@@ -30,16 +28,16 @@ class Sydesk(Urpameasure):
         source_id: str,
         default_value: float = 0,
         default_expiration: int = 60 * 60,
-        default_description: Optional[str] = None
+        default_description: Optional[str] = None,
     ) -> None:
         """[summary]
 
         Args:
-            id (str): [description]
-            source_id (str): [description]
-            default_value (float): [description]
-            default_expiration (int): [description]
-            default_description (Optional[str], optional): [description]. Defaults to None.
+            id (str): Unique id of this measurement
+            source_id (str): String Data source ID in SyDesk
+            default_value (float): Value to be written to Sydesk. Defaults to 0
+            default_expiration (int): Expiration of the measurement in Sydesk in seconds. Defaults to 3600
+            default_description (Optional[str], optional): Description of the measurement. Defaults to None.
         """
         if id in self.measurements:
             raise KeyError(f"Measurement with id '{id}' already exists")
@@ -51,26 +49,26 @@ class Sydesk(Urpameasure):
             "source_id": source_id,
             "default_value": default_value,
             "default_expiration": default_expiration,
-            "default_description": default_description
-
+            "default_description": default_description,
         }
 
     def write(
         self,
-        id,
-        value = 0,
-        expiration = 0,
-        description = None
+        id: str,
+        value: float = 0,  # TODO theese should probably default to None cuz default_xxxx is used if not provided
+        expiration: int = 0,
+        description=None,
     ) -> None:
         """[summary]
 
         Args:
-            id ([type]): [description]
-            description ([type]): [description]
-            directory ([type], optional): [description]. Defaults to None.
-            source_id ([type], optional): [description]. Defaults to None.
-            value (int, optional): [description]. Defaults to 0.
-            expiration (int, optional): [description]. Defaults to 0.
+            id (str): Unique id of this measurement
+            value (float, optional): Value to be written to Sydesk. self.measurements[id]["default_value"] is used if not provided. Defaults to 0
+            expiration (int, optional): Expiration of the measurement in Sydesk in seconds. self.measurements[id]["default_expiration"] is used if not provided. Defaults to 0.
+            description ([type], optional): Description of the measurement. self.measurements[id]["default_description"] is used if not provided. Defaults to None.
+
+        Raises:
+            KeyError: [description]
         """
         if not id in self.measurements:
             raise KeyError(f"Measurement with id '{id}' does not exist")
@@ -81,8 +79,11 @@ class Sydesk(Urpameasure):
             this_measurement["source_id"],
             value or this_measurement["default_value"],
             expiration or this_measurement["default_expiration"],
-            description or this_measurement["default_description"]
+            description or this_measurement["default_description"],
         )
+
+    def _send_time_measure(self, id: str, value: float, expiration: int = 0, description: Optional[str] = None) -> None:
+        self.write(id=id, value=value, expiration=expiration, description=description)
 
     def _send_login_measure(self, id: str, value: float, expiration: int = 0, description: Optional[str] = None):
         this_measurement = self.measurements[id]
@@ -91,6 +92,5 @@ class Sydesk(Urpameasure):
             this_measurement["source_id"],
             value,
             expiration or this_measurement["default_expiration"],
-            description or this_measurement["default_description"]
-
+            description or this_measurement["default_description"],
         )
