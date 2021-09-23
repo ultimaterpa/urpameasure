@@ -15,12 +15,6 @@ class Sydesk(Urpameasure):
         super().__init__()
         self.directory = directory
 
-    def __new__(cls, *args, **kwargs) -> Sydesk:
-        """Prevent user from creating more than one instance of this class"""
-        logger.warning("One instance of class Sydesk already exists. Reference to it will be used")
-        if not isinstance(cls.instance, cls):
-            cls.instance = object.__new__(cls)
-        return cls.instance
 
     def add(
         self,

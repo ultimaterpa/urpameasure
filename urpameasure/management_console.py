@@ -11,21 +11,21 @@ logger = logging.getLogger(__name__)
 
 
 class Console(Urpameasure):
-    instance = None
 
     def __init__(self):
         """[summary]"""
         super().__init__()
 
-    def __new__(cls, *args: Any, **kwargs: Any) -> Console:
-        """Prevent user from creating more than one instance of this class"""
-        if not isinstance(cls.instance, cls):
-            cls.instance = object.__new__(cls)
-        else:
-            logger.warning("One instance of class Console already exists. Reference to it will be used")
-        return cls.instance
+    # TODO why tho? why cant i have two instances? one for e.g. time and login and other for metrics? ...... probably delete this
+    # def __new__(cls, *args: Any, **kwargs: Any) -> Console:
+    #     """Prevent user from creating more than one instance of this class"""
+    #     if not isinstance(cls.instance, cls):
+    #         cls.instance = object.__new__(cls)
+    #     else:
+    #         logger.warning("One instance of class Console already exists. Reference to it will be used")
+    #     return cls.instance
 
-    def add(
+    def add( # maybe TODO here and in write() - force arg types that Console accepts
         self,
         id: str,
         default_status: str = NONE,
@@ -57,13 +57,7 @@ class Console(Urpameasure):
         check_valid_status(default_status)
         if id in self.measurements:
             raise KeyError(f"Measurement with id '{id}' already exists")
-        if not default_name[0].isnumeric():
-            if strict_mode:
-                raise ValueError(
-                    "String arg 'default_name' must start with a number.\nIf you don't want to use a number at the beginning of 'default_name' use arg 'strict_mode=False'"
-                )
-            else:
-                logger.warning("String arg 'default_name' doesn't start with a number")
+        check_name(default_name, strict_mode)
         self.measurements[id] = {
             "default_name": default_name,
             "default_status": default_status,
@@ -84,6 +78,7 @@ class Console(Urpameasure):
         tolerance: Optional[float] = None,
         description: Optional[str] = None,
         precision: Optional[int] = None,
+        strict_mode: bool = True,
     ) -> None:
         """Writes a measurement to Management Console
 
@@ -105,11 +100,11 @@ class Console(Urpameasure):
         if not id in self.measurements:
             raise ValueError(f"Invalid measurement id '{id}'")
         this_measurement = self.measurements[id]
+        name = name or this_measurement["default_name"]
+        check_name(name, strict_mode)
         # use either user supplied value or default value that was defined in self.add method
-        print(f"value {value}")
-        print(value or this_measurement["default_value"] or 0 if value == 0 else 0)
         urpa.write_measure(
-            name=name or this_measurement["default_name"],
+            name=name,
             status=status or this_measurement["default_status"],
             # cannot use simple 'or' for value because '0' can be valid measurement
             value=value if value is not None else this_measurement["default_value"],
@@ -152,6 +147,7 @@ class Console(Urpameasure):
             value (float): time value
             status (str): status of the time measurement to be shown in Management Console
         """
+        check_valid_status(status) # TODO do this everywhere where status is supplied as an arg
         self.write(id=id, status=status, value=value)
 
     def _send_login_measure(
@@ -159,8 +155,7 @@ class Console(Urpameasure):
         id: str,
         value: float,
         error_status: str = ERROR,
-        success_status: str = SUCCESS,
-        default_status: str = NONE,
+        success_status: str = SUCCESS, # TODO for example here lmao   (hint: read previous todo)
     ) -> None:
         """Method called by measure_login decorato
 
@@ -169,11 +164,31 @@ class Console(Urpameasure):
             value (float): value - 0 for ERROR, 100 for SUCCESS, others for undefined (for example for cases where robot did't attempt login yet)
             error_status (str, optional): status to be shown in Console if value is 0. Defaults to ERROR.
             success_status (str, optional): status to be shown in Console if value is 100. Defaults to SUCCESS.
-            default_status (str, optional): status to be shown in Console if value is other than 0 or 100. Defaults to NONE.
         """
-        status = default_status  # default - may be used as clear state (robot did not attempt to login yet)
         if value == 0:
             status = error_status
         elif value == 100:
             status = success_status
+        else:
+            raise ValueError(f"This should not have happened. Login measure value is not 0 or 100: '{value}'")
         self.write(id=id, status=status, value=value)
+
+
+def check_name(name: str, strict_mode: bool):
+    """Checks whether string 'name' begins with a digit.
+    Warns user or waises exception if not - behaviour based on bool 'strict_mode'
+
+    Args:
+        name (str): string to be checked
+        strict_mode (bool): behavioural flag - raise exception or warn user
+
+    Raises:
+        ValueError: If 'name' does not start with a digit and 'strict_mode' is set to True
+    """
+    if not name[0].isnumeric():
+        if strict_mode:
+            raise ValueError(
+                "String arg 'default_name' must start with a number.\nIf you don't want to use a number at the beginning of 'default_name' use arg 'strict_mode=False'"
+            )
+        else:
+            logger.warning("String arg 'default_name' doesn't start with a number")

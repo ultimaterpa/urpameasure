@@ -18,6 +18,12 @@ class Urpameasure(ABC):
         """[summary]"""
         self.measurements = {}
 
+    def __new__(cls):
+        if cls is Urpameasure:
+            raise TypeError("Base class Urpameasure can't be instantiated")
+        return object.__new__(cls)
+
+
     def edit_default_value(self, id: str, value_key: str, new_value: Union[str, int, float, None]) -> None:
         """Edits default value of an existing measurement
 
@@ -36,6 +42,7 @@ class Urpameasure(ABC):
             raise KeyError(
                 f"Invalid key '{value_key}'. Please use one of the following: '{self.measurements[id].keys()}'"
             )
+        # TODO name strict_mode ...... b-b-b-but Sydesk :( ...... ---> jednom kdyz name instance je Console
         if value_key == "default_status":
             check_valid_status(new_value)
         self.measurements[id][value_key] = new_value
@@ -79,7 +86,8 @@ class Urpameasure(ABC):
 
     def _remove_time_measure_file(self):
         """Removes file with time measure after it is no longer needed"""
-        os.remove(MEASURE_TIME_FILE_NAME)
+        if os.path.isfile(MEASURE_TIME_FILE_NAME):
+            os.remove(MEASURE_TIME_FILE_NAME)
 
     def clear(self, id: str) -> None:
         """Writes a measurement with all default values
@@ -125,14 +133,13 @@ class Urpameasure(ABC):
 
     def measure_login(self, id, **kwargs):
         """decorator
-        kwargs for console: error_status, success_status, default_status
+        kwargs for console: error_status, success_status
         kwargs for sydesk: expiration, description
         """
 
         def wrapper(func):
             @wraps(func)
             def inner():
-                # self._send_login_measure(id, 50, error_status, success_status, default_status)  # reset value - can be anything besides 0 and 100
                 try:
                     func()
                 except Exception as error:
