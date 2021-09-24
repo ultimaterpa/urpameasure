@@ -16,26 +16,38 @@ measurement = urpameasure.Console()
 
 then we can start adding metrics we want to measure
 ```python
-measurement.add("01 login")
-measurement.add("02 processed", default_unit="%")
-measurement.add("03 time", default_unit="seconds")
+measurement.add("login", default_name="01 Login Measurement")
+measurement.add("processed", default_unit="%")
+measurement.add("time", default_unit="seconds")
 ```
 
 lastly, all there is to do is to write the measurements. Login and time measurements can be written via decorator
 ```python
-@measure.measure_login("01 login")
+@measure.measure_login("login")
 def login():
     pass
 
-@measure.measure_time("03 time")
+@measure.measure_time("time")
 def main():
     login()
     for i in range(1, 101):
-        measumerent.write("02 processed", value=i)
+        measumerent.write("processed", value=i)
 ```
 
 ### Working with Sydesk
-TODO
+Working with Sydesk is almost same as working with Console. Only differences are in arguments the measurement accepts.
+All possible arguments are described in [Documentation](#Documentation) section of this document
+```python
+import urpameasure
+
+measurement = urpameasure.Sydesk()
+
+measurement.add("some measurement", "SYDESK_SOURCE_ID")
+measurement.add("another measurement", "ANOTHER_SYDESK_SOURCE_ID", default_description="foo bar")
+
+measurement.write("some measurement", value=5)
+measurement.write("another measurement", value=2, expiration=5)
+```
 
 ## Documentation
 The module has two main classes: `Console` and `Sydesk` for working with Management Console and Sydesk respectively.
