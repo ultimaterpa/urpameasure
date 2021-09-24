@@ -1,7 +1,10 @@
+"""Module containing class for Sydesk measurements"""
+
 from __future__ import annotations
 
 import logging
 from typing import Optional
+from urpameasure.globals import InvalidMeasurementIdError, MeasurementIdExistsError, SourceIdTooLongError
 from .urpameasure import Urpameasure
 
 import urpa
@@ -15,7 +18,6 @@ class Sydesk(Urpameasure):
         super().__init__()
         self.directory = directory
 
-
     def add(
         self,
         id: str,
@@ -24,7 +26,7 @@ class Sydesk(Urpameasure):
         default_expiration: int = 60 * 60,
         default_description: Optional[str] = None,
     ) -> None:
-        """[summary]
+        """Adds a new measurement to self.measurements
 
         Args:
             id (str): Unique id of this measurement
@@ -32,12 +34,16 @@ class Sydesk(Urpameasure):
             default_value (float): Value to be written to Sydesk. Defaults to 0
             default_expiration (int): Expiration of the measurement in Sydesk in seconds. Defaults to 3600
             default_description (Optional[str], optional): Description of the measurement. Defaults to None.
+
+        Raises:
+            MeasurementIdExistsError: measurement with this id already exists
+            SourceIdTooLongError: source_id is longer than 32 characters
         """
         if id in self.measurements:
-            raise KeyError(f"Measurement with id '{id}' already exists")
+            raise MeasurementIdExistsError(id)
 
         if len(source_id) > 32:
-            raise ValueError("string source_id can't be longer than 32 characters")
+            raise SourceIdTooLongError
 
         self.measurements[id] = {
             "source_id": source_id,
@@ -49,11 +55,11 @@ class Sydesk(Urpameasure):
     def write(
         self,
         id: str,
-        value: float = 0,  # TODO theese should probably default to None cuz default_xxxx is used if not provided
+        value: float = 0,
         expiration: int = 0,
         description=None,
     ) -> None:
-        """[summary]
+        """Writes a measurement to sydesk
 
         Args:
             id (str): Unique id of this measurement
@@ -62,10 +68,10 @@ class Sydesk(Urpameasure):
             description ([type], optional): Description of the measurement. self.measurements[id]["default_description"] is used if not provided. Defaults to None.
 
         Raises:
-            KeyError: [description]
+            InvalidMeasurementIdError: Measurement with this id does not exist
         """
         if not id in self.measurements:
-            raise KeyError(f"Measurement with id '{id}' does not exist")
+            raise InvalidMeasurementIdError(id)
 
         this_measurement = self.measurements[id]
         urpa.write_sydesk_measure(

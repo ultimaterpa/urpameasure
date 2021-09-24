@@ -206,6 +206,11 @@ measurement.clear_all()
 ```
 Iterates over all measurements and sets their values to `default_xxxx`
 
+Change default value of a measurement:
+```python
+measurement.edit_default_value("measure id", "default_value", 100)
+```
+
 Measure time decorator:
 ```python
 # first define measurement for sending time
@@ -306,3 +311,8 @@ def login(app):
 def main():
     pass
 ```
+
+## Custom Errors
+- `MeasurementIdExistsError` - Raised when user tries to add another measurement wit id that already exists
+- `InvalidMeasurementIdError` - Raised when user tries to access a measurement with id taht does not exist
+- `SourceIdTooLongError` - Only for Sydesk: raised when user tries to define source_id longer than 32 characters

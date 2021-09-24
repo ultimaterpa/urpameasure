@@ -1,3 +1,5 @@
+"""Module containing class for MAnagement Console measurements"""
+
 from __future__ import annotations
 from typing import Optional, Any
 import logging
@@ -5,7 +7,7 @@ import logging
 import urpa
 from .urpameasure import Urpameasure
 from .globals import *
-from .utils import check_valid_status
+from .utils import check_valid_status, check_name
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +15,7 @@ logger = logging.getLogger(__name__)
 class Console(Urpameasure):
 
     def __init__(self):
-        """[summary]"""
+        """init"""
         super().__init__()
 
     # TODO why tho? why cant i have two instances? one for e.g. time and login and other for metrics? ...... probably delete this
@@ -37,7 +39,7 @@ class Console(Urpameasure):
         default_precision: Optional[int] = None,
         strict_mode: bool = True,
     ) -> None:
-        """[summary]
+        """Adds a new measurement to self.measurements
 
         Args:
             id (str): unique id of this measurement
@@ -51,12 +53,12 @@ class Console(Urpameasure):
             strict_mode (bool, optional): name must start with a digit if enabled. Defaults to True.
 
         Raises:
-            KeyError: attempted to add a measurement with id that already exists
+            MeasurementIdExistsError: attempted to add a measurement with id that already exists
             ValueError: name does not start with a digit in strict mode
         """
         check_valid_status(default_status)
         if id in self.measurements:
-            raise KeyError(f"Measurement with id '{id}' already exists")
+            raise MeasurementIdExistsError(id)
         check_name(default_name, strict_mode)
         self.measurements[id] = {
             "default_name": default_name,
@@ -72,7 +74,7 @@ class Console(Urpameasure):
         self,
         id: str,
         status: Optional[str] = None,
-        name: Optional[str] = None,  # TODO add strict mode
+        name: Optional[str] = None,
         value: Optional[float] = None,
         unit: Optional[str] = None,
         tolerance: Optional[float] = None,
@@ -93,12 +95,12 @@ class Console(Urpameasure):
             precision (Optional[int], optional): precision to be written to Console. self.measurements[id]["default_precision"] is used if not provided. Defaults to None.
 
         Raises:
-            ValueError: measurement with provided id dos not exist
+            InvalidMeasurementIdError: measurement with provided id dos not exist
         """
         if status:
             check_valid_status(status)
         if not id in self.measurements:
-            raise ValueError(f"Invalid measurement id '{id}'")
+            raise InvalidMeasurementIdError(id)
         this_measurement = self.measurements[id]
         name = name or this_measurement["default_name"]
         check_name(name, strict_mode)
@@ -147,7 +149,7 @@ class Console(Urpameasure):
             value (float): time value
             status (str): status of the time measurement to be shown in Management Console
         """
-        check_valid_status(status) # TODO do this everywhere where status is supplied as an arg
+        check_valid_status(status)
         self.write(id=id, status=status, value=value)
 
     def _send_login_measure(
@@ -155,7 +157,7 @@ class Console(Urpameasure):
         id: str,
         value: float,
         error_status: str = ERROR,
-        success_status: str = SUCCESS, # TODO for example here lmao   (hint: read previous todo)
+        success_status: str = SUCCESS,
     ) -> None:
         """Method called by measure_login decorato
 
@@ -165,6 +167,7 @@ class Console(Urpameasure):
             error_status (str, optional): status to be shown in Console if value is 0. Defaults to ERROR.
             success_status (str, optional): status to be shown in Console if value is 100. Defaults to SUCCESS.
         """
+        # no need for checking valid status here. It is checked in the write() method
         if value == 0:
             status = error_status
         elif value == 100:
@@ -172,23 +175,3 @@ class Console(Urpameasure):
         else:
             raise ValueError(f"This should not have happened. Login measure value is not 0 or 100: '{value}'")
         self.write(id=id, status=status, value=value)
-
-
-def check_name(name: str, strict_mode: bool):
-    """Checks whether string 'name' begins with a digit.
-    Warns user or waises exception if not - behaviour based on bool 'strict_mode'
-
-    Args:
-        name (str): string to be checked
-        strict_mode (bool): behavioural flag - raise exception or warn user
-
-    Raises:
-        ValueError: If 'name' does not start with a digit and 'strict_mode' is set to True
-    """
-    if not name[0].isnumeric():
-        if strict_mode:
-            raise ValueError(
-                "String arg 'default_name' must start with a number.\nIf you don't want to use a number at the beginning of 'default_name' use arg 'strict_mode=False'"
-            )
-        else:
-            logger.warning("String arg 'default_name' doesn't start with a number")

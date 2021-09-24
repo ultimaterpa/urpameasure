@@ -5,6 +5,9 @@ from freezegun import freeze_time
 
 import urpameasure
 
+MEASUREMENT_NAME_1 = "measurement"
+MEASUREMENT_NAME_2 = "another measurement"
+
 
 class Test_console:
     """[summary]"""
@@ -12,10 +15,10 @@ class Test_console:
     def test_add(self):
         measure = urpameasure.Console()
         assert not measure.measurements
-        measure.add("a measurement")
+        measure.add(MEASUREMENT_NAME_1)
         assert len(measure.measurements) == 1
         measure.add(
-            "another measurement",
+            MEASUREMENT_NAME_2,
             default_status=urpameasure.ERROR,
             default_name="02 App Navigation",
             default_value=0,
@@ -26,7 +29,7 @@ class Test_console:
         )
         assert len(measure.measurements) == 2
         # check both measurement have correct default values
-        this_measurement = measure.measurements["a measurement"]
+        this_measurement = measure.measurements[MEASUREMENT_NAME_1]
         assert this_measurement["default_status"] == urpameasure.NONE
         assert this_measurement["default_name"] == "0 Unnamed measurement"
         assert this_measurement["default_value"] is None
@@ -34,7 +37,7 @@ class Test_console:
         assert this_measurement["default_tolerance"] == 0
         assert this_measurement["default_description"] is None
         assert this_measurement["default_precision"] is None
-        this_measurement = measure.measurements["another measurement"]
+        this_measurement = measure.measurements[MEASUREMENT_NAME_2]
         assert this_measurement["default_status"] == urpameasure.ERROR
         assert this_measurement["default_name"] == "02 App Navigation"
         assert this_measurement["default_value"] == 0
@@ -44,7 +47,7 @@ class Test_console:
         assert this_measurement["default_precision"] == 2
         # try adding measurement with existing id
         with pytest.raises(KeyError):
-            measure.add("a measurement")
+            measure.add(MEASUREMENT_NAME_1)
         # test ValueError for adding invalid status and invalid name in strict mode
         with pytest.raises(ValueError):
             measure.add("abc", default_status="ab")
@@ -53,20 +56,22 @@ class Test_console:
 
     def test_edit_default_value_errors(self):
         measure = urpameasure.Console()
-        measure.add("measurement")
+        measure.add(MEASUREMENT_NAME_1)
         with pytest.raises(KeyError):
-            measure.edit_default_value("different measurement", "", "")
+            measure.edit_default_value(MEASUREMENT_NAME_2, "", "")
         with pytest.raises(KeyError):
             # invalid key
-            measure.edit_default_value("measurement", "value", "")
+            measure.edit_default_value(MEASUREMENT_NAME_1, "value", "")
         with pytest.raises(KeyError):
             # key that should only work with Sydesk
-            measure.edit_default_value("measurement", "default_expiration", "")
+            measure.edit_default_value(MEASUREMENT_NAME_1, "default_expiration", "")
+        with pytest.raises(ValueError):
+            measure.edit_default_value(MEASUREMENT_NAME_1, "default_name", "Name without a digit at the beginning")
 
     @pytest.mark.parametrize(
         "key,value",
         [
-            ("default_name", "05 name"), # TODO az dodelam cekovani strict modu do tyhle metody tak tady na to udelej taky test (pripadne spis ho dej o metodu vejs kde se testujou errory)
+            ("default_name", "05 name"),
             ("default_status", urpameasure.INFO),
             ("default_value", 5.2),
             ("default_unit", "abc"),
@@ -77,23 +82,23 @@ class Test_console:
     )
     def test_edit_default_value(self, key, value):
         measure = urpameasure.Console()
-        measure.add("measurement")
-        measure.edit_default_value("measurement", key, value) # TODO "measurement" dej nekam do konstanty protze to pouzivas na plno mistech
-        assert measure.measurements["measurement"][key] == value
+        measure.add(MEASUREMENT_NAME_1)
+        measure.edit_default_value(MEASUREMENT_NAME_1, key, value)
+        assert measure.measurements[MEASUREMENT_NAME_1][key] == value
 
     def test_write(self):
         # can't really test writing correct values to Console;
         # atleast test raiseng correct errors
         measure = urpameasure.Console()
-        measure.add("measurement")
+        measure.add(MEASUREMENT_NAME_1)
         with pytest.raises(ValueError):
-            measure.write("different measurement")
+            measure.write(MEASUREMENT_NAME_2)
         with pytest.raises(ValueError):
-            measure.write("measurement", status="abc")
+            measure.write(MEASUREMENT_NAME_1, status="abc")
         with pytest.raises(ValueError):
-            measure.write("measurement", name="abc")
+            measure.write(MEASUREMENT_NAME_1, name="abc")
         with does_not_raise_error():
-            measure.write("measurement", name="abc", strict_mode=False)
+            measure.write(MEASUREMENT_NAME_1, name="abc", strict_mode=False)
 
     def test_measure_time(self):
         measure = urpameasure.Console()

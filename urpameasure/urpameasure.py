@@ -1,3 +1,5 @@
+"""Module containig base class for Console and Sydesk classes"""
+
 import logging
 import os
 
@@ -5,26 +7,35 @@ import time
 
 from abc import ABC, abstractmethod
 from functools import wraps
-from typing import Optional, Union
+from typing import Callable, Union, Any
 
 from .globals import *
-from .utils import check_valid_status
+from .utils import check_valid_status, check_name
 
 logger = logging.getLogger(__name__)
 
 
 class Urpameasure(ABC):
     def __init__(self):
-        """[summary]"""
+        """init"""
         self.measurements = {}
 
     def __new__(cls):
+        """Called when creating new instance
+
+        Raises:
+            TypeError: when instancing this class directly (only child classes may be instanced)
+
+        Returns:
+            Console or Sydesk: object
+        """
         if cls is Urpameasure:
             raise TypeError("Base class Urpameasure can't be instantiated")
         return object.__new__(cls)
 
-
-    def edit_default_value(self, id: str, value_key: str, new_value: Union[str, int, float, None]) -> None:
+    def edit_default_value(
+        self, id: str, value_key: str, new_value: Union[str, int, float, None], strict_mode: bool = True
+    ) -> None:
         """Edits default value of an existing measurement
 
         Args:
@@ -33,47 +44,58 @@ class Urpameasure(ABC):
             new_value (str): value of the new value
 
         Raises:
-            KeyError: provided measurement id does not exist
+            InvalidMeasurementIdError: provided measurement id does not exist
             KeyError: provided measurement id does not contain desired key
+            SourceIdTooLongError: source_id is longer than 32 characters
         """
         if not id in self.measurements:
-            raise KeyError(f"Measurement with id '{id}' does not exist")
+            raise InvalidMeasurementIdError(id)
         if not value_key in self.measurements[id].keys():
             raise KeyError(
                 f"Invalid key '{value_key}'. Please use one of the following: '{self.measurements[id].keys()}'"
             )
-        # TODO name strict_mode ...... b-b-b-but Sydesk :( ...... ---> jednom kdyz name instance je Console
+        # these two are only for Console
+        # no need for checking if instance is Console because Sydesk does not have
+        # "default_name" and "default_status". So if user tries to edit them on Sydesk it never gets here.
+        # ---> KeyError is raised above
+        if value_key == "default_name":
+            check_name(new_value, strict_mode)
         if value_key == "default_status":
             check_valid_status(new_value)
+        if value_key == "source_id" and len(new_value) > 32:
+            raise SourceIdTooLongError
+
         self.measurements[id][value_key] = new_value
 
     def _touch_time_measure_file(self) -> None:
-        """[summary]"""
+        """Creates a file with time value written in it"""
         if not os.path.isfile(MEASURE_TIME_FILE_NAME):
             with open(MEASURE_TIME_FILE_NAME, "w") as file:
                 file.write(str(time.time()))
 
-    def _start_time_measure(self):
+    def _start_time_measure(self) -> None:
+        """Starts time measuring by creating measure_file"""
         self._touch_time_measure_file()
 
     @abstractmethod
-    def _send_time_measure(self, *args) -> None:
+    def _send_time_measure(self, *args: Any) -> None:
         """Placeholder method to be overriden from child classes"""
         return
 
     @abstractmethod
-    def _send_login_measure(self, *args) -> None:
+    def _send_login_measure(self, *args: Any) -> None:
+        """Placeholder method to be overriden from child classes"""
         return
 
     @abstractmethod
-    def _get_measured_time(self, *args) -> float:
-        """
+    def _get_measured_time(self, *args: Any) -> float:
+        """Reads content of the measure_file and subtracts it from current time
 
         Args:
-            unit ([type]): [description]
+            unit (str): Time unit. Used only for Console ("s", "m", "h")
 
         Returns:
-            str: [description]
+            float: calculated time
         """
         with open(MEASURE_TIME_FILE_NAME, "r") as file:
             start_value = float(file.read())
@@ -81,10 +103,11 @@ class Urpameasure(ABC):
         return time_elapsed_seconds
 
     @abstractmethod
-    def write(self, *args) -> None:
-        """[summary]"""
+    def write(self, *args: Any) -> None:
+        """Placeholder method to be overriden from child classes"""
+        return
 
-    def _remove_time_measure_file(self):
+    def _remove_time_measure_file(self) -> None:
         """Removes file with time measure after it is no longer needed"""
         if os.path.isfile(MEASURE_TIME_FILE_NAME):
             os.remove(MEASURE_TIME_FILE_NAME)
@@ -103,7 +126,7 @@ class Urpameasure(ABC):
         for measurement_id in self.measurements:
             self.clear(measurement_id)
 
-    def measure_time(self, id, time_unit: str = SECONDS, **kwargs):
+    def measure_time(self, id, time_unit: str = SECONDS, **kwargs: Any) -> Callable:
         """decorator
         kwargs for console: status
         kwargs for sydesk: expiration, description
@@ -131,7 +154,7 @@ class Urpameasure(ABC):
 
         return wrapper
 
-    def measure_login(self, id, **kwargs):
+    def measure_login(self, id: str, **kwargs: Any) -> Callable:
         """decorator
         kwargs for console: error_status, success_status
         kwargs for sydesk: expiration, description
