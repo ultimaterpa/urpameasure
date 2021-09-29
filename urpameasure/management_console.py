@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 class Console(Urpameasure):
-
     def __init__(self):
         """init"""
         super().__init__()
@@ -27,7 +26,7 @@ class Console(Urpameasure):
     #         logger.warning("One instance of class Console already exists. Reference to it will be used")
     #     return cls.instance
 
-    def add( # maybe TODO here and in write() - force arg types that Console accepts
+    def add(  # maybe TODO here and in write() - force arg types that Console accepts
         self,
         id: str,
         default_status: str = NONE,
