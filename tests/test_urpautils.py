@@ -127,8 +127,68 @@ class Test_console:
 
 
 class Test_sydesk:
-    # TODO test na sourtceid
-    pass
+    def test_add(self):
+        measure = urpameasure.Sydesk("path/to/dir")
+        assert not measure.measurements
+        measure.add(MEASUREMENT_NAME_1, "Source Id")
+        assert len(measure.measurements) == 1
+        measure.add(
+            MEASUREMENT_NAME_2,
+            "SOURCE_ID",
+            default_value=5,
+            default_expiration=60,
+            default_description="foo bar"
+        )
+        assert len(measure.measurements) == 2
+        # check both measurement have correct default values
+        this_measurement = measure.measurements[MEASUREMENT_NAME_1]
+        assert this_measurement["source_id"] == "Source Id"
+        assert this_measurement["default_value"] == 0
+        assert this_measurement["default_expiration"] == 60 * 60
+        assert this_measurement["default_description"] is None
+        this_measurement = measure.measurements[MEASUREMENT_NAME_2]
+        assert this_measurement["source_id"] == "SOURCE_ID"
+        assert this_measurement["default_value"] == 5
+        assert this_measurement["default_expiration"] == 60
+        assert this_measurement["default_description"] == "foo bar"
+        # try adding measurement with existing id
+        with pytest.raises(MeasurementIdExistsError):
+            measure.add(MEASUREMENT_NAME_1, "SOURCE_ID")
+        # test ValueError for source_id's name too long
+        with pytest.raises(ValueError):
+            measure.add("abc", "this sentence is 33 chars long...")
+
+    def test_edit_default_value_errors(self):
+        measure = urpameasure.Sydesk("path/to/dir")
+        measure.add(MEASUREMENT_NAME_1, "source id")
+        with pytest.raises(InvalidMeasurementIdError):
+            measure.edit_default_value(MEASUREMENT_NAME_2, "", "")
+        with pytest.raises(KeyError):
+            # invalid key
+            measure.edit_default_value(MEASUREMENT_NAME_1, "value", "")
+        with pytest.raises(KeyError):
+            # key that should only work with Console
+            measure.edit_default_value(MEASUREMENT_NAME_1, "default_status", "")
+        with pytest.raises(ValueError):
+            measure.edit_default_value(MEASUREMENT_NAME_1, "source_id", "this sentence is 33 chars long...")
+
+    def test_write(self):
+        # can't really test writing correct values to Console;
+        # atleast test raiseng correct errors
+        measure = urpameasure.Sydesk("path/to/dir")
+        measure.add(MEASUREMENT_NAME_1, "source id")
+        with pytest.raises(InvalidMeasurementIdError):
+            measure.write(MEASUREMENT_NAME_2)
+
+    def test_measure_time(self):
+        measure = urpameasure.Sydesk("path/to/file")
+        # simulate how the measure_time decorator works
+        measure._remove_time_measure_file()
+        with freeze_time("2012-01-14 15:30"):
+            measure._start_time_measure()
+        with freeze_time("2012-01-14 15:31"):
+            assert measure._get_measured_time() == 60
+            measure._remove_time_measure_file()
 
 
 class Test_miscs:

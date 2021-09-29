@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
+from typing import Optional, Any
 from urpameasure.globals import InvalidMeasurementIdError, MeasurementIdExistsError, SourceIdTooLongError
 from .urpameasure import Urpameasure
 
@@ -94,3 +94,6 @@ class Sydesk(Urpameasure):
             expiration or this_measurement["default_expiration"],
             description or this_measurement["default_description"],
         )
+
+    def _get_measured_time(self, *args: Any) -> float:
+        return super()._get_measured_time(*args)

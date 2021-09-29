@@ -20,7 +20,7 @@ class Urpameasure(ABC):
         """init"""
         self.measurements = {}
 
-    def __new__(cls):
+    def __new__(cls, *args):
         """Called when creating new instance
 
         Raises:

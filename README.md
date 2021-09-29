@@ -161,7 +161,7 @@ Creating instance:
 ```python
 import urpameasure
 
-Measurement = urpameasure.Sydesk()
+Measurement = urpameasure.Sydesk("/path/to/directory")
 ```
 
 Adding metrics:
