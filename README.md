@@ -7,27 +7,27 @@ Can be used with Management Console and Sydesk
 The urpameasure module provides higher order functionality for sending measurements with UltimateRPA robots. It encapsulates classes for working with both measurement variants - Management Console and Sydesk.
 
 ### Working with Management Console
-First, we need to create the measurement object
+First, we need to create the Measurement object
 ```python
 import urpameasure
 
-measurement = urpameasure.Console()
+Measurement = urpameasure.Console()
 ```
 
 then we can start adding metrics we want to measure
 ```python
-measurement.add("login", default_name="01 Login Measurement")
-measurement.add("processed", default_unit="%")
-measurement.add("time", default_unit="seconds")
+Measurement.add("login", default_name="01 Login Measurement")
+Measurement.add("processed", default_unit="%")
+Measurement.add("time", default_unit="seconds")
 ```
 
 lastly, all there is to do is to write the measurements. Login and time measurements can be written via decorator
 ```python
-@measure.measure_login("login")
+@Mmeasurement.measure_login("login")
 def login():
     pass
 
-@measure.measure_time("time")
+@Measurement.measure_time("time")
 def main():
     login()
     for i in range(1, 101):
@@ -40,13 +40,13 @@ All possible arguments are described in [Documentation](#Documentation) section 
 ```python
 import urpameasure
 
-measurement = urpameasure.Sydesk()
+Measurement = urpameasure.Sydesk()
 
-measurement.add("some measurement", "SYDESK_SOURCE_ID")
-measurement.add("another measurement", "ANOTHER_SYDESK_SOURCE_ID", default_description="foo bar")
+Measurement.add("some measurement", "SYDESK_SOURCE_ID")
+Measurement.add("another measurement", "ANOTHER_SYDESK_SOURCE_ID", default_description="foo bar")
 
-measurement.write("some measurement", value=5)
-measurement.write("another measurement", value=2, expiration=5)
+Measurement.write("some measurement", value=5)
+Measurement.write("another measurement", value=2, expiration=5)
 ```
 
 ## Documentation
@@ -58,12 +58,12 @@ Creating instance:
 ```python
 import urpameasure
 
-measurement = urpameasure.Console()
+Measurement = urpameasure.Console()
 ```
 
 Adding metrics:
 ```python
-measurement.add(
+Measurement.add(
     "measure id"
     default_status=urpameasure.INFO,
     default_name="01 My measurement",
@@ -88,7 +88,7 @@ Args starting with `default_` are default values used as clear state (see `measu
 
 Writing measurement:
 ```python
-measurement.write(
+Measurement.write(
     "measure id",
     status=urpameasure.SUCCESS,
     name="a02 Some measurement",
@@ -113,28 +113,28 @@ If some of the keyword args are not provided, `default_xxxx` which was specified
 
 Clearing measurement:
 ```python
-measurement.clear("measure id")
+Measurement.clear("measure id")
 ```
 This method call will set all measurement values to `default_xxxx` values which were specified with `measurement.add()` call
 
 Clearing all measurements
 ```python
-measurement.clear_all()
+Measurement.clear_all()
 ```
 Iterates over all measurements and sets their values to `default_xxxx`
 
 Change default value of a measurement:
 ```python
-measurement.edit_default_value("measure id", "default_description", "Edited default description")
+Measurement.edit_default_value("measure id", "default_description", "Edited default description")
 ```
 
 Measure time decorator:
 ```python
 # first define measurement for sending time
-measurement.add("09 time", default_unit="minutes")
+Measurement.add("09 time", default_unit="minutes")
 
 # then decorate a function you want to measure time of execution of
-@measure.measure_time("09 time", time_unit=urpameasure.MINUTES)
+@Measurement.measure_time("09 time", time_unit=urpameasure.MINUTES)
 def main():
     pass
 ```
@@ -144,7 +144,7 @@ Note: do not confuse `default_unit` with `time_unit`:
 
 Measure login decorator:
 ```python
-@measure.measure_login("01 login")
+@Measurement.measure_login("01 login")
 def login():
     pass
 ```
@@ -161,12 +161,12 @@ Creating instance:
 ```python
 import urpameasure
 
-measurement = urpameasure.Sydesk()
+Measurement = urpameasure.Sydesk()
 ```
 
 Adding metrics:
 ```python
-measurement.add(
+Measurement.add(
     "measure id"
     "source id"
     default_value=0,
@@ -182,7 +182,7 @@ measurement.add(
 
 Writing measurement:
 ```python
-measurement.write(
+Measurement.write(
     "measure id"
     value=1.5,
     expiration=2,
@@ -196,35 +196,35 @@ measurement.write(
 
 Clearing measurement:
 ```python
-measurement.clear("measure id")
+Measurement.clear("measure id")
 ```
 This method call will set all measurement values to `default_xxxx` values which were specified with `measurement.add()` call
 
 Clearing all measurements
 ```python
-measurement.clear_all()
+Measurement.clear_all()
 ```
 Iterates over all measurements and sets their values to `default_xxxx`
 
 Change default value of a measurement:
 ```python
-measurement.edit_default_value("measure id", "default_value", 100)
+Measurement.edit_default_value("measure id", "default_value", 100)
 ```
 
 Measure time decorator:
 ```python
 # first define measurement for sending time
-measurement.add("time")
+Measurement.add("time")
 
 # then decorate a function you want to measure time of execution of
-@measure.measure_time("time")
+@Measurement.measure_time("time")
 def main():
     pass
 ```
 
 Measure login decorator:
 ```python
-@measure.measure_login("login", expiration=0, description="time measurement")
+@Measurement.measure_login("login", expiration=0, description="time measurement")
 def login():
     pass
 ```
@@ -237,10 +237,10 @@ import urpa
 import urpameasure
 
 # create Console class instance
-Measure = urpameasure.Console()
+Measurement = urpameasure.Console()
 # add all desired metrics
-Measure.add("login", default_name="01 App login")
-Measure.add(
+Measurement.add("login", default_name="01 App login")
+Measurement.add(
     "app_navigation",
     default_status=urpameasure.ERROR,
     default_name="02 App Navigation",
@@ -250,51 +250,51 @@ Measure.add(
     default_description="Keeps track of navigation steps trough the app",
     default_precision=2
 )
-Measure.add("records_done", default_status=urpameasure.INFO, default_name="03 Percentage done", default_unit="%")
+Measurement.add("records_done", default_status=urpameasure.INFO, default_name="03 Percentage done", default_unit="%")
 # turn off strict mode so we can use default_name that doesn't start with a digit
-Measure.add("time", default_name="Time elapsed", strcit_mode=False)
+Measurement.add("time", default_name="Time elapsed", strcit_mode=False)
 
 
-@measure.measure_login("login")
+@Measurement.measure_login("login")
 def login(app):
     app.find_first("Login").send_mouse_click()
 
 
-@measure.measure_time("time")
+@Measurement.measure_time("time")
 def main():
     # Clear all measurements. `default_xxxx` values defined with Measure.add() method call will be used
-    Measure.clear_all()
+    Measurement.clear_all()
     # Write a measurement to Management Console. All arguments that are not supplied will use values defined with Measure.add() method call
-    Measure.write("app_navigation", value=0)
+    Measurement.write("app_navigation", value=0)
     app = urpa.open_app(1234)
     # Update a measurement and override some of its default values
-    Measure.write("app_navigation", value=50, description="App opened")
+    Measurement.write("app_navigation", value=50, description="App opened")
     login(app)
-    Measure.write("app_navigation", value=100, status=urpameasure.SUCCESS)
+    Measurement.write("app_navigation", value=100, status=urpameasure.SUCCESS)
     for record_index in range(1, 101):
         # do some work here
-        Measure.write("records_done", value=record_index, description=f"Records remaining: {100 - record_index}")
+        Measurement.write("records_done", value=record_index, description=f"Records remaining: {100 - record_index}")
     # We can clear only one measurement at a time
-    Measure.clear("app_navigation")
+    Measurement.clear("app_navigation")
     # We can edit some of its default values that are used as a clear state
-    Measure.edit_dfefault_value("app_navigation", "default_unit", "Procenta")
-    Measure.cleat("app_navigation")
+    Measurement.edit_dfefault_value("app_navigation", "default_unit", "Procenta")
+    Measurement.cleat("app_navigation")
 ```
 
 ### Take more control over login and time function decorators - Management Console
 ```python
 # We can override statuses which by default are SUCCESS for value 100, ERROR for value 0 and NONE for values other than 0 and 100
 # Values 0 and 100 are implicitly written by this function decorator (0: exception was raised, 100: exception was not raised)
-@measure.measure_login("login", error_status=urpameasure.WARNING, success_status=urpameasure.INFO)
+@Measurement.measure_login("login", error_status=urpameasure.WARNING, success_status=urpameasure.INFO)
 def login(app):
     # We can write arbitrary value to login measure to hint some other state than success/error
-    Measure.write("login", value=50, status: urpameasure.NONE, description="The robot did not attempt login yet")
+    Measurement.write("login", value=50, status: urpameasure.NONE, description="The robot did not attempt login yet")
     app.find_first("Login").send_mouse_click()
 
 
 # Time units can be urpameasure.SECONDS, urpameasure.MINUTES, urpameasure.HOURS
 # The time conversion is done automaticaly based on this value
-@measure.measure_time("time", time_units=urpameasure.MINUTES, status=urpameasure.NONE)
+@Measurement.measure_time("time", time_units=urpameasure.MINUTES, status=urpameasure.NONE)
 def main():
     pass
 ```
@@ -302,12 +302,12 @@ def main():
 ### Take more control over login and time function decorators - Sydesk
 ```python
 # We can override expiration and description
-@measure.measure_login("login", expiration=2, description="A login success measurement")
+@Measurement.measure_login("login", expiration=2, description="A login success measurement")
 def login(app):
     app.find_first("Login").send_mouse_click()
 
 
-@measure.measure_time("time", expiration=2, description="A time measurement")
+@Measurement.measure_time("time", expiration=2, description="A time measurement")
 def main():
     pass
 ```
