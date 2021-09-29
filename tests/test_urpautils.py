@@ -4,6 +4,7 @@ import pytest
 from freezegun import freeze_time
 
 import urpameasure
+from urpameasure.globals import MeasurementIdExistsError, InvalidMeasurementIdError, SourceIdTooLongError
 
 MEASUREMENT_NAME_1 = "measurement"
 MEASUREMENT_NAME_2 = "another measurement"
@@ -46,7 +47,7 @@ class Test_console:
         assert this_measurement["default_description"] == "Keeps track of navigation steps trough the app"
         assert this_measurement["default_precision"] == 2
         # try adding measurement with existing id
-        with pytest.raises(KeyError):
+        with pytest.raises(MeasurementIdExistsError):
             measure.add(MEASUREMENT_NAME_1)
         # test ValueError for adding invalid status and invalid name in strict mode
         with pytest.raises(ValueError):
@@ -57,7 +58,7 @@ class Test_console:
     def test_edit_default_value_errors(self):
         measure = urpameasure.Console()
         measure.add(MEASUREMENT_NAME_1)
-        with pytest.raises(KeyError):
+        with pytest.raises(InvalidMeasurementIdError):
             measure.edit_default_value(MEASUREMENT_NAME_2, "", "")
         with pytest.raises(KeyError):
             # invalid key
@@ -91,7 +92,7 @@ class Test_console:
         # atleast test raiseng correct errors
         measure = urpameasure.Console()
         measure.add(MEASUREMENT_NAME_1)
-        with pytest.raises(ValueError):
+        with pytest.raises(InvalidMeasurementIdError):
             measure.write(MEASUREMENT_NAME_2)
         with pytest.raises(ValueError):
             measure.write(MEASUREMENT_NAME_1, status="abc")
@@ -126,6 +127,7 @@ class Test_console:
 
 
 class Test_sydesk:
+    # TODO test na sourtceid
     pass
 
 
