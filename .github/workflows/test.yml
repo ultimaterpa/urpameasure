@@ -39,4 +39,4 @@ jobs:
         pytest
     - name: Check with mypy
       run: |
-        mypy urpameasure
+        mypy urpameasure --disable-error-code override

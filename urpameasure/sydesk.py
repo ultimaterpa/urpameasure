@@ -57,7 +57,7 @@ class Sydesk(Urpameasure):
         id: str,
         value: float = 0,
         expiration: int = 0,
-        description=None,
+        description: Optional[str] = None,
     ) -> None:
         """Writes a measurement to sydesk
 

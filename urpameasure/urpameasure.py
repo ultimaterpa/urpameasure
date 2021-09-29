@@ -54,15 +54,19 @@ class Urpameasure(ABC):
             raise KeyError(
                 f"Invalid key '{value_key}'. Please use one of the following: '{self.measurements[id].keys()}'"
             )
+        # ignore type checking bellow. Mypy complains about the Union types becasuse `check_name` and
+        # `check_valid_status` accepts "str" and `len` accepts "Sized"
+
         # these two are only for Console
         # no need for checking if instance is Console because Sydesk does not have
         # "default_name" and "default_status". So if user tries to edit them on Sydesk it never gets here.
         # ---> KeyError is raised above
         if value_key == "default_name":
-            check_name(new_value, strict_mode)
+            check_name(new_value, strict_mode)  # type: ignore
         if value_key == "default_status":
-            check_valid_status(new_value)
-        if value_key == "source_id" and len(new_value) > 32:
+            check_valid_status(new_value)  # type: ignore
+        # only for Sydesk
+        if value_key == "source_id" and len(new_value) > 32:  # type: ignore
             raise SourceIdTooLongError
 
         self.measurements[id][value_key] = new_value
@@ -78,14 +82,14 @@ class Urpameasure(ABC):
         self._touch_time_measure_file()
 
     @abstractmethod
-    def _send_time_measure(self, *args: Any) -> None:
+    def _send_time_measure(self, *args: Any, **kwargs: Any) -> None:
         """Placeholder method to be overriden from child classes"""
-        return
+        raise NotImplementedError
 
     @abstractmethod
-    def _send_login_measure(self, *args: Any) -> None:
+    def _send_login_measure(self, *args: Any, **kwargs: Any) -> None:
         """Placeholder method to be overriden from child classes"""
-        return
+        raise NotImplementedError
 
     @abstractmethod
     def _get_measured_time(self, *args: Any) -> float:
@@ -103,9 +107,9 @@ class Urpameasure(ABC):
         return time_elapsed_seconds
 
     @abstractmethod
-    def write(self, *args: Any) -> None:
+    def write(self, *args: Any, **kwargs: Any) -> None:
         """Placeholder method to be overriden from child classes"""
-        return
+        raise NotImplementedError
 
     def _remove_time_measure_file(self) -> None:
         """Removes file with time measure after it is no longer needed"""
