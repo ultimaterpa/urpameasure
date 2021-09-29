@@ -133,11 +133,7 @@ class Test_sydesk:
         measure.add(MEASUREMENT_NAME_1, "Source Id")
         assert len(measure.measurements) == 1
         measure.add(
-            MEASUREMENT_NAME_2,
-            "SOURCE_ID",
-            default_value=5,
-            default_expiration=60,
-            default_description="foo bar"
+            MEASUREMENT_NAME_2, "SOURCE_ID", default_value=5, default_expiration=60, default_description="foo bar"
         )
         assert len(measure.measurements) == 2
         # check both measurement have correct default values
