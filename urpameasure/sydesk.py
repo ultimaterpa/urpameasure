@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 class Sydesk(Urpameasure):
     def __init__(self, directory):
+        """Init"""
         super().__init__()
         self.directory = directory
 
@@ -24,7 +25,7 @@ class Sydesk(Urpameasure):
         source_id: str,
         default_value: float = 0,
         default_expiration: int = 60 * 60,
-        default_description: Optional[str] = None,
+        default_description: str = "",
     ) -> None:
         """Adds a new measurement to self.measurements
 
@@ -33,7 +34,7 @@ class Sydesk(Urpameasure):
             source_id (str): String Data source ID in SyDesk
             default_value (float): Value to be written to Sydesk. Defaults to 0
             default_expiration (int): Expiration of the measurement in Sydesk in seconds. Defaults to 3600
-            default_description (Optional[str], optional): Description of the measurement. Defaults to None.
+            default_description (str): Description of the measurement. Defaults to empty string.
 
         Raises:
             MeasurementIdExistsError: measurement with this id already exists
@@ -83,9 +84,13 @@ class Sydesk(Urpameasure):
         )
 
     def _send_time_measure(self, id: str, value: float, expiration: int = 0, description: Optional[str] = None) -> None:
+        """Called by measure_time decorator. Sends time measurement"""
         self.write(id=id, value=value, expiration=expiration, description=description)
 
-    def _send_login_measure(self, id: str, value: float, expiration: int = 0, description: Optional[str] = None):
+    def _send_login_measure(
+        self, id: str, value: float, expiration: int = 0, description: Optional[str] = None
+    ) -> None:
+        """Called by measure_login decorator. Sends login measurement"""
         this_measurement = self.measurements[id]
         urpa.write_sydesk_measure(
             self.directory,
@@ -96,4 +101,5 @@ class Sydesk(Urpameasure):
         )
 
     def _get_measured_time(self, *args: Any) -> float:
+        """"""
         return super()._get_measured_time(*args)

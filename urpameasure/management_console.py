@@ -1,7 +1,7 @@
-"""Module containing class for MAnagement Console measurements"""
+"""Module containing class for Management Console measurements"""
 
 from __future__ import annotations
-from typing import Optional, Any
+from typing import Optional
 import logging
 
 import urpa
@@ -17,20 +17,11 @@ class Console(Urpameasure):
         """init"""
         super().__init__()
 
-    # TODO why tho? why cant i have two instances? one for e.g. time and login and other for metrics? ...... probably delete this
-    # def __new__(cls, *args: Any, **kwargs: Any) -> Console:
-    #     """Prevent user from creating more than one instance of this class"""
-    #     if not isinstance(cls.instance, cls):
-    #         cls.instance = object.__new__(cls)
-    #     else:
-    #         logger.warning("One instance of class Console already exists. Reference to it will be used")
-    #     return cls.instance
-
-    def add(  # maybe TODO here and in write() - force arg types that Console accepts
+    def add(
         self,
         id: str,
         default_status: str = NONE,
-        default_name: str = "0 Unnamed measurement",  # TODO consider defaulting to 'id'
+        default_name: str = "0 Unnamed measurement",
         default_value: Optional[float] = None,
         default_unit: Optional[str] = None,
         default_tolerance: float = 0,

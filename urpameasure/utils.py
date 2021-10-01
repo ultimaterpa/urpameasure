@@ -24,7 +24,7 @@ def check_valid_status(status: str) -> None:
 
 def check_name(name: str, strict_mode: bool) -> None:
     """Checks whether string 'name' begins with a digit.
-    Warns user or waises exception if not - behaviour based on bool 'strict_mode'
+    Warns user or raises exception if not - behaviour based on bool 'strict_mode'
 
     Args:
         name (str): string to be checked

@@ -2,7 +2,6 @@
 
 MEASURE_TIME_FILE_NAME: str = "time.measure"
 
-# probably TODO move statuses and time units to dataclasses ???
 SUCCESS: str = "SUCCESS"
 WARNING: str = "WARNING"
 ERROR: str = "ERROR"

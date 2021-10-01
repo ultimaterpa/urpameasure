@@ -1,6 +1,6 @@
-"""Module containing all tests for urpameasure"""
-from contextlib import nullcontext as does_not_raise_error
+"""Module containing all unit tests for urpameasure"""
 import pytest
+from contextlib import nullcontext as does_not_raise_error
 from freezegun import freeze_time
 
 import urpameasure
@@ -11,9 +11,10 @@ MEASUREMENT_NAME_2 = "another measurement"
 
 
 class Test_console:
-    """[summary]"""
+    """Tests for methods in Console class"""
 
     def test_add(self):
+        """Test adding new measurements"""
         measure = urpameasure.Console()
         assert not measure.measurements
         measure.add(MEASUREMENT_NAME_1)
@@ -56,6 +57,7 @@ class Test_console:
             measure.add("abc", default_name="ab")
 
     def test_edit_default_value_errors(self):
+        """Test correct error raising while editing default values for existing measurements"""
         measure = urpameasure.Console()
         measure.add(MEASUREMENT_NAME_1)
         with pytest.raises(InvalidMeasurementIdError):
@@ -82,12 +84,14 @@ class Test_console:
         ],
     )
     def test_edit_default_value(self, key, value):
+        """Test editing default values for existing measurements"""
         measure = urpameasure.Console()
         measure.add(MEASUREMENT_NAME_1)
         measure.edit_default_value(MEASUREMENT_NAME_1, key, value)
         assert measure.measurements[MEASUREMENT_NAME_1][key] == value
 
     def test_write(self):
+        """Test writing a measurement"""
         # can't really test writing correct values to Console;
         # atleast test raiseng correct errors
         measure = urpameasure.Console()
@@ -102,6 +106,7 @@ class Test_console:
             measure.write(MEASUREMENT_NAME_1, name="abc", strict_mode=False)
 
     def test_measure_time(self):
+        """Test time measure"""
         measure = urpameasure.Console()
         # simulate how the measure_time decorator works
         measure._remove_time_measure_file()
@@ -127,7 +132,10 @@ class Test_console:
 
 
 class Test_sydesk:
+    """Tests for methods in Sydesk class"""
+
     def test_add(self):
+        """Test adding new measurements"""
         measure = urpameasure.Sydesk("path/to/dir")
         assert not measure.measurements
         measure.add(MEASUREMENT_NAME_1, "Source Id")
@@ -155,6 +163,7 @@ class Test_sydesk:
             measure.add("abc", "this sentence is 33 chars long...")
 
     def test_edit_default_value_errors(self):
+        """Test correct error raising while editing default values for existing measurements"""
         measure = urpameasure.Sydesk("path/to/dir")
         measure.add(MEASUREMENT_NAME_1, "source id")
         with pytest.raises(InvalidMeasurementIdError):
@@ -169,6 +178,7 @@ class Test_sydesk:
             measure.edit_default_value(MEASUREMENT_NAME_1, "source_id", "this sentence is 33 chars long...")
 
     def test_write(self):
+        """Test writing a measurement"""
         # can't really test writing correct values to Console;
         # atleast test raiseng correct errors
         measure = urpameasure.Sydesk("path/to/dir")
@@ -177,6 +187,7 @@ class Test_sydesk:
             measure.write(MEASUREMENT_NAME_2)
 
     def test_measure_time(self):
+        """Test time measure"""
         measure = urpameasure.Sydesk("path/to/file")
         # simulate how the measure_time decorator works
         measure._remove_time_measure_file()
@@ -188,13 +199,13 @@ class Test_sydesk:
 
 
 class Test_miscs:
-    """[summary]"""
+    """Test miscellaneous functions that are not directly tied to Console or Sydesk classes"""
 
     def test_parent_class_instancing(self):
+        """Test if instancing super class raises correct error"""
         with pytest.raises(TypeError):
             urpameasure.Urpameasure()
 
-    ######## TODO probably move these two to test_console since they are not used with sydesk.... but than again they are not Console() methods soooo..... #####
     @pytest.mark.parametrize(
         "status,expected",
         [
@@ -210,6 +221,7 @@ class Test_miscs:
         ],
     )
     def test_status_validation(self, status, expected):
+        """Test raising correct error for invalid status string"""
         with expected:
             urpameasure.check_valid_status(status)
 
@@ -223,7 +235,6 @@ class Test_miscs:
         ],
     )
     def test_measurement_name(self, name, strict_mode, expected):
+        """Test raising correct error for name of the measurement"""
         with expected:
             urpameasure.check_name(name, strict_mode)
-
-    ##############################################################################################################################################
