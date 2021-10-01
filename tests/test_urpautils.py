@@ -149,7 +149,7 @@ class Test_sydesk:
         assert this_measurement["source_id"] == "Source Id"
         assert this_measurement["default_value"] == 0
         assert this_measurement["default_expiration"] == 60 * 60
-        assert this_measurement["default_description"] is None
+        assert this_measurement["default_description"] == ""
         this_measurement = measure.measurements[MEASUREMENT_NAME_2]
         assert this_measurement["source_id"] == "SOURCE_ID"
         assert this_measurement["default_value"] == 5
