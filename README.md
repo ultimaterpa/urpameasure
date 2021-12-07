@@ -288,7 +288,7 @@ def main():
 @Measurement.measure_login("login", error_status=urpameasure.WARNING, success_status=urpameasure.INFO)
 def login(app):
     # We can write arbitrary value to login measure to hint some other state than success/error
-    Measurement.write("login", value=50, status: urpameasure.NONE, description="The robot did not attempt login yet")
+    Measurement.write("login", value=50, status=urpameasure.NONE, description="The robot did not attempt login yet")
     app.find_first("Login").send_mouse_click()
 
 
