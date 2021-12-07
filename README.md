@@ -40,7 +40,7 @@ All possible arguments are described in [Documentation](#Documentation) section 
 ```python
 import urpameasure
 
-Measurement = urpameasure.Sydesk()
+Measurement = urpameasure.Sydesk("/path/to/dir")
 
 Measurement.add("some measurement", "SYDESK_SOURCE_ID")
 Measurement.add("another measurement", "ANOTHER_SYDESK_SOURCE_ID", default_description="foo bar")
