@@ -313,6 +313,6 @@ def main():
 ```
 
 ## Custom Errors
-- `MeasurementIdExistsError` - Raised when user tries to add another measurement wit id that already exists
-- `InvalidMeasurementIdError` - Raised when user tries to access a measurement with id taht does not exist
+- `MeasurementIdExistsError` - Raised when user tries to add another measurement with id that already exists
+- `InvalidMeasurementIdError` - Raised when user tries to access a measurement with id that does not exist
 - `SourceIdTooLongError` - Only for Sydesk: raised when user tries to define source_id longer than 32 characters
