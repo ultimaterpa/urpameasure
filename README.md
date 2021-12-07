@@ -151,7 +151,7 @@ def login():
 Sends value 100 - SUCCESS if execution of function `login()` finishes.
 Sends value 0 - ERROR if exception is raised during execution of function `login()`
 
-`measure_login()` decorator has three optional keyword argumensts:
+`measure_login()` decorator has two optional keyword argumensts:
 - error_status - defaults to urpameasure.ERROR (status to be displayed if login value is 0)
 - success_status - defaults to urpameasure.SUCCESS (status to be displayed if login value is 100)
 
