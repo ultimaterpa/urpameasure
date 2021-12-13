@@ -214,7 +214,7 @@ Measurement.edit_default_value("measure id", "default_value", 100)
 Measure time decorator:
 ```python
 # first define measurement for sending time
-Measurement.add("time")
+Measurement.add("time", "source id")
 
 # then decorate a function you want to measure time of execution of
 @Measurement.measure_time("time")
