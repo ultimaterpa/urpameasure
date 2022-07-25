@@ -101,5 +101,9 @@ class Sydesk(Urpameasure):
         )
 
     def _get_measured_time(self, *args: Any) -> float:
-        """"""
+        """Calls super's _get_measured_time
+
+        Returns:
+            float: measured time in seconds
+        """
         return super()._get_measured_time(*args)

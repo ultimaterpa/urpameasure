@@ -131,7 +131,7 @@ class Urpameasure(ABC):
             self.clear(measurement_id)
 
     def measure_time(self, id, time_unit: str = SECONDS, **kwargs: Any) -> Callable:
-        """decorator
+        """decorator for measuring time elapsed during function execution
         kwargs for console: status
         kwargs for sydesk: expiration, description
         """
@@ -159,7 +159,7 @@ class Urpameasure(ABC):
         return wrapper
 
     def measure_login(self, id: str, **kwargs: Any) -> Callable:
-        """decorator
+        """decorator for measuring success of a login in a function
         kwargs for console: error_status, success_status
         kwargs for sydesk: expiration, description
         """

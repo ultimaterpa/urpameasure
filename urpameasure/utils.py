@@ -41,3 +41,13 @@ def check_name(name: str, strict_mode: bool) -> None:
             )
         else:
             logger.warning("String arg 'default_name' doesn't start with a number")
+
+
+def check_unit(unit: str) -> None:
+    """Checks if unit is valid string
+
+    Args:
+        unit (str): unit to check
+    """
+    if not isinstance(unit, str):
+        raise TypeError("'unit' must be type 'str'")

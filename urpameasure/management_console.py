@@ -7,7 +7,7 @@ import logging
 import urpa
 from .urpameasure import Urpameasure
 from .globals import *
-from .utils import check_valid_status, check_name
+from .utils import check_valid_status, check_name, check_unit
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class Console(Urpameasure):
         default_status: str = NONE,
         default_name: str = "0 Unnamed measurement",
         default_value: Optional[float] = None,
-        default_unit: Optional[str] = None,
+        default_unit: str = "",
         default_tolerance: float = 0,
         default_description: Optional[str] = None,
         default_precision: Optional[int] = None,
@@ -50,6 +50,7 @@ class Console(Urpameasure):
         if id in self.measurements:
             raise MeasurementIdExistsError(id)
         check_name(default_name, strict_mode)
+        check_unit(default_unit)
         self.measurements[id] = {
             "default_name": default_name,
             "default_status": default_status,
@@ -83,6 +84,7 @@ class Console(Urpameasure):
             tolerance (Optional[float], optional): tolerance to be written to Console. self.measurements[id]["default_tolerance"] is used if not provided. Defaults to None.
             description (Optional[str], optional): description to be written to Console. self.measurements[id]["default_description"] is used if not provided. Defaults to None.
             precision (Optional[int], optional): precision to be written to Console. self.measurements[id]["default_precision"] is used if not provided. Defaults to None.
+            strict_mode (bool, optional): if True, name of the measurement must start with a digit. Defaults to True.
 
         Raises:
             InvalidMeasurementIdError: measurement with provided id dos not exist
@@ -100,7 +102,8 @@ class Console(Urpameasure):
             status=status or this_measurement["default_status"],
             # cannot use simple 'or' for value because '0' can be valid measurement
             value=value if value is not None else this_measurement["default_value"],
-            unit=unit or this_measurement["default_unit"],
+            # cannot use simple 'or' for unit because empty string can be valid unit
+            unit=this_measurement["default_unit"] if unit is None else unit,
             # cannot use simple 'or' for tolerance because '0' can be valid value for it
             tolerance=tolerance if tolerance is not None else this_measurement["default_tolerance"],
             description=description or this_measurement["default_description"],

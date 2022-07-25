@@ -277,8 +277,8 @@ def main():
     # We can clear only one measurement at a time
     Measurement.clear("app_navigation")
     # We can edit some of its default values that are used as a clear state
-    Measurement.edit_dfefault_value("app_navigation", "default_unit", "Procenta")
-    Measurement.cleat("app_navigation")
+    Measurement.edit_default_value("app_navigation", "default_unit", "Procenta")
+    Measurement.clear("app_navigation")
 ```
 
 ### Take more control over login and time function decorators - Management Console
