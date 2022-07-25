@@ -35,7 +35,7 @@ class Test_console:
         assert this_measurement["default_status"] == urpameasure.NONE
         assert this_measurement["default_name"] == "0 Unnamed measurement"
         assert this_measurement["default_value"] is None
-        assert this_measurement["default_unit"] is None
+        assert this_measurement["default_unit"] == ""
         assert this_measurement["default_tolerance"] == 0
         assert this_measurement["default_description"] is None
         assert this_measurement["default_precision"] is None
