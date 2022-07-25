@@ -23,7 +23,7 @@ Measurement.add("time", default_unit="seconds")
 
 lastly, all there is to do is to write the measurements. Login and time measurements can be written via decorator
 ```python
-@Mmeasurement.measure_login("login")
+@Measurement.measure_login("login")
 def login():
     pass
 
@@ -31,7 +31,7 @@ def login():
 def main():
     login()
     for i in range(1, 101):
-        measumerent.write("processed", value=i)
+        measurement.write("processed", value=i)
 ```
 
 ### Working with Sydesk
