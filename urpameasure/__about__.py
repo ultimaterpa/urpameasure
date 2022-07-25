@@ -1,0 +1,8 @@
+"""Information about urpameasure module."""
+__title__ = "urpameasure"
+__description__ = "Module containig wrapper classes for sending measurements with Management Console and Sydesk used with UltimateRPA robots"
+__version__ = "0.1.0"
+__author__ = "anerold"
+__author_email__ = "support@ultimaterpa.cz"
+__url__ = "https://github.com/ultimaterpa/urpameasure"
+__license__ = "MIT"
